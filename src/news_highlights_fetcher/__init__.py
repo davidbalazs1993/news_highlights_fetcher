@@ -1,0 +1,1 @@
+"""News highlights fetcher package."""

@@ -1,0 +1,21 @@
+domains:
+  cncf:
+    feeds:
+      - https://www.cncf.io/feed/
+      - https://kubernetes.io/feed.xml
+  aws_ai_services:
+    feeds:
+      - https://aws.amazon.com/blogs/machine-learning/feed/
+      - https://aws.amazon.com/blogs/ai/feed/
+  aws_eks:
+    feeds:
+      - https://aws.amazon.com/blogs/containers/feed/
+  gcp:
+    feeds:
+      - https://cloud.google.com/blog/rss/
+  grafana:
+    feeds:
+      - https://grafana.com/blog/index.xml
+  opentelemetry:
+    feeds:
+      - https://opentelemetry.io/blog/index.xml

@@ -1,0 +1,27 @@
+[project]
+name = "news-highlights-fetcher"
+version = "0.1.0"
+description = "Fetches and summarizes news highlights from curated RSS feeds."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "feedparser>=6.0.11",
+  "python-dateutil>=2.9.0",
+  "requests>=2.32.3",
+  "beautifulsoup4>=4.12.3",
+  "pyyaml>=6.0.2",
+  "openai>=1.44.0",
+  "tenacity>=9.0.0",
+]
+
+[project.scripts]
+news-highlights = "news_highlights_fetcher.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.6.4",
+]
