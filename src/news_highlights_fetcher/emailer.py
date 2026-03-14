@@ -11,6 +11,7 @@ def send_email_ses(
     from_address: str,
     subject: str,
     body: str,
+    html_body: str | None = None,
     region: str | None = None,
 ) -> None:
     to_list = [addr.strip() for addr in to_addresses if addr.strip()]
@@ -25,6 +26,9 @@ def send_email_ses(
         Destination={"ToAddresses": to_list},
         Message={
             "Subject": {"Data": subject},
-            "Body": {"Text": {"Data": body}},
+            "Body": {
+                "Text": {"Data": body},
+                **({"Html": {"Data": html_body}} if html_body else {}),
+            },
         },
     )

@@ -7,7 +7,7 @@ import boto3
 
 from .cli import _load_env_file
 from .emailer import send_email_ses
-from .runner import generate_report
+from .runner import generate_report, render_report_html
 
 
 def _resolve_default_config() -> Path:
@@ -52,11 +52,13 @@ def handler(event: dict, context: object) -> dict:
     email_region = os.getenv("AWS_REGION") or os.getenv("SES_REGION")
     subject = os.getenv("EMAIL_SUBJECT") or f"News highlights (last {days} days)"
     if email_to and email_from:
+        html_report = render_report_html(report)
         send_email_ses(
             to_addresses=[addr.strip() for addr in email_to.split(",") if addr.strip()],
             from_address=email_from,
             subject=subject,
             body=report,
+            html_body=html_report,
             region=email_region,
         )
 

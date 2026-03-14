@@ -39,3 +39,34 @@ def generate_report(
         lines.append("")
 
     return "\n".join(lines).strip()
+
+
+def render_report_html(report: str) -> str:
+    lines = report.splitlines()
+    html_lines: list[str] = ["<html>", "<body>"]
+    in_list = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            title = stripped.replace("## ", "", 1)
+            html_lines.append(f"<h2>{title}</h2>")
+            continue
+        if stripped.startswith("- "):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            item = stripped.replace("- ", "", 1)
+            html_lines.append(f"<li>{item}</li>")
+            continue
+        if stripped:
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            html_lines.append(f"<p>{stripped}</p>")
+    if in_list:
+        html_lines.append("</ul>")
+    html_lines.extend(["</body>", "</html>"])
+    return "\n".join(html_lines)

@@ -12,7 +12,8 @@ domains:
       - https://aws.amazon.com/blogs/containers/feed/
   gcp:
     feeds:
-      - https://cloud.google.com/blog/rss/
+      - https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/rss/
+
   grafana:
     feeds:
       - https://grafana.com/blog/index.xml

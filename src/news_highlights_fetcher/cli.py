@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from .emailer import send_email_ses
-from .runner import generate_report
+from .runner import generate_report, render_report_html
 
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "defaults.yaml"
@@ -100,11 +100,13 @@ def main() -> None:
     email_region = args.email_region or os.getenv("AWS_REGION") or os.getenv("SES_REGION")
     email_subject = args.email_subject or f"News highlights (last {args.days} days)"
     if email_to or email_from:
+        html_report = render_report_html(report)
         send_email_ses(
             to_addresses=[addr.strip() for addr in email_to.split(",") if addr.strip()],
             from_address=email_from,
             subject=email_subject,
             body=report,
+            html_body=html_report,
             region=email_region,
         )
 

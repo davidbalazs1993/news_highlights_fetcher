@@ -2,6 +2,14 @@
 
 Fetches highlights from curated RSS feeds for the last _X_ days, then summarizes the results and extracts the highlights by domain.
 
+## How it works (short summary)
+
+- Loads configured domains and RSS feeds from YAML.
+- Fetches RSS entries and filters them to the last _X_ days.
+- Optionally fetches full article content.
+- Sends items to the LLM and returns 3–7 highlights per domain.
+- Outputs to stdout and can email the same report.
+
 
 ## Quickstart (UV)
 
@@ -58,6 +66,7 @@ Use AWS services that are in the free tier for a small weekly job:
 - **EventBridge** scheduler (every Monday 9am).
 - **Lambda** runs this package and generates the report.
 - **SES** sends the email.
+  Emails are sent as both plain text and HTML for nicer formatting.
 
 ### Required environment variables (Lambda)
 
@@ -100,15 +109,20 @@ the handler will fetch the secret from SSM with decryption.
 ### Lambda packaging (zip)
 
 ```
-uv venv
-source .venv/bin/activate
-
-rm -rf dist/lambda
-mkdir -p dist/lambda
-uv pip install --target dist/lambda .
-cp -r config dist/lambda/
-cd dist/lambda
-zip -r ../news-highlights-lambda.zip .
+docker run --rm -it \
+  --platform linux/amd64 \
+  -v "$PWD":/work -w /work \
+  --entrypoint /bin/bash \
+  public.ecr.aws/lambda/python:3.11 \
+  -c "
+    yum -y install zip &&
+    rm -rf dist/lambda &&
+    mkdir -p dist/lambda &&
+    pip install . --target dist/lambda &&
+    cp -r config dist/lambda/ &&
+    cd dist/lambda &&
+    zip -r ../news-highlights-lambda.zip .
+  "
 ```
 
 ### EventBridge schedules
