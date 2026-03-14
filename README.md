@@ -2,9 +2,6 @@
 
 Fetches highlights from curated RSS feeds for the last _X_ days (or longer), then summarizes by domain.
 
-## Why no LangChain/LangGraph?
-
-This is a deterministic pipeline: fetch feeds → filter by date → extract text → summarize. A lightweight custom flow is easier to debug, cheaper to run, and simpler to deploy. You can add LangGraph later if you need complex orchestration or tool-calling.
 
 ## Quickstart (UV)
 
@@ -54,13 +51,11 @@ Run with UV:
 uv run news-highlights
 ```
 
-## AWS (later deployment idea)
-
 ## AWS Free Tier Deployment (weekly email)
 
 Use AWS services that are in the free tier for a small weekly job:
 
-- **EventBridge** scheduled rule (every Monday 8am).
+- **EventBridge** scheduler (every Monday 9am).
 - **Lambda** runs this package and generates the report.
 - **SES** sends the email.
 
@@ -118,7 +113,7 @@ zip -r ../news-highlights-lambda.zip .
 
 ### EventBridge schedules
 
-- Weekly Monday 08:00: `cron(0 8 ? * MON *)`
+- Weekly Monday 08:00: `cron(0 9 ? * MON *)`
 - Monthly 1st 08:00: `cron(0 8 1 * ? *)`
 
 ## Notes
