@@ -1,6 +1,6 @@
 # News Highlights Fetcher
 
-Fetches highlights from curated RSS feeds for the last _X_ days (or longer), then summarizes by domain.
+Fetches highlights from curated RSS feeds for the last _X_ days, then summarizes the results and extracts the highlights by domain.
 
 
 ## Quickstart (UV)
