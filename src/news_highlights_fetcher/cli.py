@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import os
+from pathlib import Path
 
-from .config import load_config
-from .fetcher import enrich_items_with_content, fetch_feed_items
-from .summarizer import summarize_domain
+from .emailer import send_email_ses
+from .runner import generate_report
 
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "defaults.yaml"
@@ -48,34 +47,66 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip fetching full article content (use RSS summaries only).",
     )
+    parser.add_argument(
+        "--no-stdout",
+        action="store_true",
+        help="Do not print highlights to stdout.",
+    )
+    parser.add_argument(
+        "--email-to",
+        type=str,
+        default="",
+        help="Comma-separated list of recipient emails.",
+    )
+    parser.add_argument(
+        "--email-from",
+        type=str,
+        default="",
+        help="Sender email address (must be verified in SES).",
+    )
+    parser.add_argument(
+        "--email-subject",
+        type=str,
+        default="",
+        help="Email subject (defaults to last X days).",
+    )
+    parser.add_argument(
+        "--email-region",
+        type=str,
+        default="",
+        help="AWS SES region (defaults to AWS_REGION or SES_REGION).",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _parse_args()
     _load_env_file(DEFAULT_ENV)
-    config = load_config(args.config)
 
-    domain_filter = {d.strip() for d in args.domains.split(",") if d.strip()}
-    domains = config.domains
-    if domain_filter:
-        domains = [d for d in domains if d.name in domain_filter]
+    domain_filter = {d.strip() for d in args.domains.split(",") if d.strip()} or None
+    report = generate_report(
+        days=args.days,
+        config_path=args.config,
+        domains_filter=domain_filter,
+        model=args.model,
+        skip_content=args.skip_content,
+    )
 
-    if not domains:
-        print("No domains configured. Provide a config with at least one domain.")
-        return
+    if not args.no_stdout:
+        print(report)
 
-    for domain in domains:
-        items = fetch_feed_items(domain.name, domain.feeds, args.days)
-        if not args.skip_content:
-            items = enrich_items_with_content(items)
-        highlights = summarize_domain(domain.name, args.days, items, args.model)
-        print(f"\n## {highlights.domain} (last {highlights.window_days} days)")
-        if not highlights.highlights:
-            print("- No recent items found.")
-            continue
-        for highlight in highlights.highlights:
-            print(f"- {highlight}")
+    email_to = args.email_to or os.getenv("EMAIL_TO", "")
+    email_from = args.email_from or os.getenv("EMAIL_FROM", "")
+    email_region = args.email_region or os.getenv("AWS_REGION") or os.getenv("SES_REGION")
+    email_subject = args.email_subject or f"News highlights (last {args.days} days)"
+    if email_to or email_from:
+        send_email_ses(
+            to_addresses=[addr.strip() for addr in email_to.split(",") if addr.strip()],
+            from_address=email_from,
+            subject=email_subject,
+            body=report,
+            region=email_region,
+        )
 
 
 if __name__ == "__main__":

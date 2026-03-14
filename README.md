@@ -56,10 +56,70 @@ uv run news-highlights
 
 ## AWS (later deployment idea)
 
+## AWS Free Tier Deployment (weekly email)
+
+Use AWS services that are in the free tier for a small weekly job:
+
 - **EventBridge** scheduled rule (every Monday 8am).
-- **Lambda** runs this package, writes summary.
-- **SES** to email the summary to you.
-- Optional **S3** for storing historical runs.
+- **Lambda** runs this package and generates the report.
+- **SES** sends the email.
+
+### Required environment variables (Lambda)
+
+Set these in your Lambda configuration:
+
+```
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
+EMAIL_TO=you@example.com
+EMAIL_FROM=you@example.com
+AWS_REGION=eu-west-1
+```
+
+### Lambda handler (wrapper)
+
+Use the built-in handler at `news_highlights_fetcher.lambda_handler.handler`.
+
+Example Lambda environment variables:
+
+```
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
+EMAIL_TO=you@example.com
+EMAIL_FROM=you@example.com
+AWS_REGION=eu-west-1
+DAYS=7
+```
+
+If you prefer AWS SSM Parameter Store for secrets, set:
+
+```
+OPENAI_API_KEY_SSM_PARAM=/path/to/openai_api_key
+SSM_REGION=eu-west-1
+```
+
+`OPENAI_API_KEY` still works locally via `.env`. In Lambda, if
+`OPENAI_API_KEY` is not set and `OPENAI_API_KEY_SSM_PARAM` is provided,
+the handler will fetch the secret from SSM with decryption.
+
+### Lambda packaging (zip)
+
+```
+uv venv
+source .venv/bin/activate
+
+rm -rf dist/lambda
+mkdir -p dist/lambda
+uv pip install --target dist/lambda .
+cp -r config dist/lambda/
+cd dist/lambda
+zip -r ../news-highlights-lambda.zip .
+```
+
+### EventBridge schedules
+
+- Weekly Monday 08:00: `cron(0 8 ? * MON *)`
+- Monthly 1st 08:00: `cron(0 8 1 * ? *)`
 
 ## Notes
 
