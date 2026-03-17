@@ -20,3 +20,10 @@ domains:
   opentelemetry:
     feeds:
       - https://opentelemetry.io/blog/index.xml
+  sre:
+    feeds:
+      - https://sreweekly.com/feed/
+      - https://www.infoq.com/sre/rss/
+  ai:
+    feeds:
+      - https://simonwillison.net/atom/entries/
